@@ -1,0 +1,15 @@
+[tool.robotpy]
+robotpy_version = "2024.3.2.1"
+robotpy_extras = [
+  "all",
+  "apriltag",
+  "commands2",
+  "cscore",
+  "pathplannerlib",
+  "rev",
+  "sim"
+]
+requires = [
+  "photonlibpy",
+  "numpy"
+]
