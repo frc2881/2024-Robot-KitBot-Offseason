@@ -1,7 +1,7 @@
-# Robot-Template
+# Robot-KitBot-Offseason
 
-Starter template with Python (RobotPy) source code for a standard REV MAXSwerve robot
-(full implementation example: https://github.com/frc2881/2024-Robot-Offseason)
+Source code for the 2024 FRC KitBot robot migrated from Java to Python (RobotPy)
+(reference: https://github.com/frc2881/2024-Robot-KitBot)
 
 ## Installation & Deployment
 * Follow the official documentation for installing Python in your development environment (if Python 3.12 is not already installed): https://docs.wpilib.org/en/stable/docs/zero-to-robot/step-2/python-setup.html
