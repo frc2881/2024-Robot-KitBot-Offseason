@@ -22,7 +22,6 @@ class Controllers:
 
 class Subsystems:
   class Drive:
-
     kLeftRearID: int = 1
     kLeftFrontID: int = 2
     kRightRearID: int = 3
@@ -108,6 +107,23 @@ class Subsystems:
       kTurningMotorMaxForwardOutput: float = 1.0
       kTurningMotorIdleMode = CANSparkBase.IdleMode.kBrake
       kTurningMotorPIDConstants = PIDConstants(1, 0, 0, 0)
+
+  class Launcher:
+    # PWM ports/CAN IDs for motor controllers
+    kFeederID: int = 5
+    kLauncherID: int = 6
+
+    # Current limit for launcher and feed wheels
+    kLauncherCurrentLimit: int = 80
+    kFeedCurrentLimit: int = 80
+
+    # Speeds for wheels when intaking and launching. Intake speeds are negative to run the wheels in reverse
+    kLauncherSpeed: float = 1.0
+    kLaunchFeederSpeed: float = 1.0
+    kIntakeLauncherSpeed: float = -1.0
+    kIntakeFeederSpeed: float = -0.2
+
+    kLauncherDelay: float = 1.0
 
 class Sensors:
   class Gyro:

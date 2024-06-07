@@ -2,12 +2,13 @@ from wpilib import SmartDashboard, SendableChooser, PowerDistribution, DriverSta
 from commands2 import Command, cmd
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, HolonomicPathFollowerConfig, ReplanningConfig
-from lib import utils
-from lib.classes import Alliance, RobotState
+from lib import utils, logger
+from lib.classes import Alliance, RobotState, RobotMode
 from lib.controllers.game_controller import GameController
 from lib.sensors.gyro_sensor import GyroSensor
 from lib.sensors.pose_sensor import PoseSensor
 from subsystems.drive_subsystem import DriveSubsystem
+from subsystems.launcher_subsystem import LauncherSubsystem
 from subsystems.localization_subsystem import LocalizationSubsystem
 from commands.game_commands import GameCommands
 from commands.auto_commands import AutoCommands
@@ -54,6 +55,7 @@ class RobotContainer:
     self.driveSubsystem = DriveSubsystem(
       lambda: self.gyroSensor.getHeading()
     )
+    self.launcherSubsystem = LauncherSubsystem()
     # self.localizationSubsystem = LocalizationSubsystem(
     #   self.poseSensors,
     #   lambda: self.gyroSensor.getRotation(),
@@ -101,9 +103,9 @@ class RobotContainer:
     self.driverController.back().onTrue(self.gyroSensor.resetCommand())
 
     # OPERATOR ========================================
-    # self.operatorController.rightTrigger().whileTrue(cmd.none())
+    self.operatorController.rightTrigger().whileTrue(self.launcherSubsystem.runLauncherCommand())
     # self.operatorController.rightBumper().whileTrue(cmd.none())
-    # self.operatorController.leftTrigger().whileTrue(cmd.none())
+    self.operatorController.leftTrigger().whileTrue(self.launcherSubsystem.runIntakeCommand())
     # self.operatorController.leftBumper().whileTrue(cmd.none())
     # self.operatorController.rightStick().whileTrue(cmd.none())
     # self.operatorController.leftStick().whileTrue(cmd.none())
@@ -122,21 +124,21 @@ class RobotContainer:
     pass
 
   def _setupAutos(self) -> None:
-    AutoBuilder.configureHolonomic(
-      lambda: self.localizationSubsystem.getPose(), 
-      lambda pose: self.localizationSubsystem.resetPose(pose), 
-      lambda: self.driveSubsystem.getSpeeds(), 
-      lambda chassisSpeeds: self.driveSubsystem.drive(chassisSpeeds), 
-      HolonomicPathFollowerConfig(
-        constants.Subsystems.Drive.kPathFollowerTranslationPIDConstants,
-        constants.Subsystems.Drive.kPathFollowerRotationPIDConstants,
-        constants.Subsystems.Drive.kMaxSpeedMetersPerSecond, 
-        constants.Subsystems.Drive.kDriveBaseRadius, 
-        ReplanningConfig()
-      ),
-      lambda: utils.getAlliance() == Alliance.Red,
-      self.driveSubsystem
-    )
+    # AutoBuilder.configureHolonomic(
+    #   lambda: self.localizationSubsystem.getPose(), 
+    #   lambda pose: self.localizationSubsystem.resetPose(pose), 
+    #   lambda: self.driveSubsystem.getSpeeds(), 
+    #   lambda chassisSpeeds: self.driveSubsystem.drive(chassisSpeeds), 
+    #   HolonomicPathFollowerConfig(
+    #     constants.Subsystems.Drive.kPathFollowerTranslationPIDConstants,
+    #     constants.Subsystems.Drive.kPathFollowerRotationPIDConstants,
+    #     constants.Subsystems.Drive.kMaxSpeedMetersPerSecond, 
+    #     constants.Subsystems.Drive.kDriveBaseRadius, 
+    #     ReplanningConfig()
+    #   ),
+    #   lambda: utils.getAlliance() == Alliance.Red,
+    #   self.driveSubsystem
+    # )
 
     self._autoChooser = SendableChooser()
     self._autoChooser.setDefaultOption("None", lambda: cmd.none())
@@ -165,5 +167,4 @@ class RobotContainer:
     self.gyroSensor.updateTelemetry()
     for poseSensor in self.poseSensors:
       poseSensor.updateTelemetry()
-
-    SmartDashboard.putNumber("Robot/Power/TotalCurrent", self.powerDistribution.getTotalCurrent())
+    # SmartDashboard.putNumber("Robot/Power/TotalCurrent", self.powerDistribution.getTotalCurrent())
