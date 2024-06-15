@@ -2,8 +2,7 @@ from typing import Callable
 from commands2 import Subsystem
 from wpilib import SmartDashboard
 from wpimath.geometry import Rotation2d, Pose2d, Pose3d, Transform2d, Transform3d, Rotation3d
-from wpimath.kinematics import SwerveModulePosition
-from wpimath.estimator import SwerveDrive4PoseEstimator
+from wpimath.estimator import DifferentialDrivePoseEstimator
 from photonlibpy.photonPoseEstimator import PoseStrategy
 from lib.sensors.pose_sensor import PoseSensor
 from lib import utils, logger
@@ -14,18 +13,21 @@ class LocalizationSubsystem(Subsystem):
       self,
       poseSensors: list[PoseSensor],
       getGyroRotation: Callable[[], Rotation2d],
-      getSwerveModulePositions: Callable[[], tuple[SwerveModulePosition, ...]]
+      getLeftEncoderPosition: Callable[[], float],
+      getRightEncoderPosition: Callable[[], float]
     ) -> None:
     super().__init__()
 
     self._poseSensors = poseSensors
     self._getGyroRotation = getGyroRotation
-    self._getSwerveModulePositions = getSwerveModulePositions
+    self._getLeftEncoderPosition = getLeftEncoderPosition
+    self._getRightEncoderPosition = getRightEncoderPosition
 
-    self._poseEstimator = SwerveDrive4PoseEstimator(
-      constants.Subsystems.Drive.kSwerveDriveKinematics,
+    self._poseEstimator = DifferentialDrivePoseEstimator(
+      constants.Subsystems.Drive.kDifferentialDriveKinematics,
       self._getGyroRotation(),
-      self._getSwerveModulePositions(),
+      self._getLeftEncoderPosition(),
+      self._getRightEncoderPosition(),
       Pose2d()
     )
 
@@ -37,7 +39,7 @@ class LocalizationSubsystem(Subsystem):
     return self._poseEstimator.getEstimatedPosition()
 
   def _updatePose(self) -> None:
-    self._poseEstimator.update(self._getGyroRotation(), self._getSwerveModulePositions())
+    self._poseEstimator.update(self._getGyroRotation(), self._getLeftEncoderPosition(), self._getRightEncoderPosition())
     for poseSensor in self._poseSensors:
       estimatedRobotPose = poseSensor.getEstimatedRobotPose()
       if estimatedRobotPose is not None:

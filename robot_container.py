@@ -56,11 +56,12 @@ class RobotContainer:
       lambda: self.gyroSensor.getHeading()
     )
     self.launcherSubsystem = LauncherSubsystem()
-    # self.localizationSubsystem = LocalizationSubsystem(
-    #   self.poseSensors,
-    #   lambda: self.gyroSensor.getRotation(),
-    #   lambda: self.driveSubsystem.getSwerveModulePositions()
-    # )
+    self.localizationSubsystem = LocalizationSubsystem(
+      self.poseSensors,
+      lambda: self.gyroSensor.getRotation(),
+      lambda: self.driveSubsystem.getLeftEncoderPosition(),
+      lambda: self.driveSubsystem.getRightEncoderPosition(),
+    )
     
   def _initControllers(self) -> None:
     DriverStation.silenceJoystickConnectionWarning(True)
@@ -124,21 +125,15 @@ class RobotContainer:
     pass
 
   def _setupAutos(self) -> None:
-    # AutoBuilder.configureHolonomic(
-    #   lambda: self.localizationSubsystem.getPose(), 
-    #   lambda pose: self.localizationSubsystem.resetPose(pose), 
-    #   lambda: self.driveSubsystem.getSpeeds(), 
-    #   lambda chassisSpeeds: self.driveSubsystem.drive(chassisSpeeds), 
-    #   HolonomicPathFollowerConfig(
-    #     constants.Subsystems.Drive.kPathFollowerTranslationPIDConstants,
-    #     constants.Subsystems.Drive.kPathFollowerRotationPIDConstants,
-    #     constants.Subsystems.Drive.kMaxSpeedMetersPerSecond, 
-    #     constants.Subsystems.Drive.kDriveBaseRadius, 
-    #     ReplanningConfig()
-    #   ),
-    #   lambda: utils.getAlliance() == Alliance.Red,
-    #   self.driveSubsystem
-    # )
+    AutoBuilder.configureRamsete(
+      lambda: self.localizationSubsystem.getPose(),
+      lambda pose: self.localizationSubsystem.resetPose(pose), 
+      lambda: self.driveSubsystem.getSpeeds(), 
+      lambda chassisSpeeds: self.driveSubsystem.driveWithSpeeds(chassisSpeeds), 
+      ReplanningConfig(),
+      lambda: utils.getAlliance() == Alliance.Red,
+      self.driveSubsystem
+    )
 
     self._autoChooser = SendableChooser()
     self._autoChooser.setDefaultOption("None", lambda: cmd.none())
@@ -155,7 +150,7 @@ class RobotContainer:
 
   def teleopInit(self) -> None:
     self._resetRobot()
-    # self.gyroSensor.setRobotToField(self.localizationSubsystem.getPose())
+    self.gyroSensor.setRobotToField(self.localizationSubsystem.getPose())
 
   def testInit(self) -> None:
     self._resetRobot()

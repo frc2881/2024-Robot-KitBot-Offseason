@@ -6,7 +6,7 @@ from wpilib.drive import DifferentialDrive
 from wpimath.controller import PIDController
 from wpimath.filter import SlewRateLimiter
 from wpimath.geometry import Rotation2d, Pose2d
-from wpimath.kinematics import DifferentialDriveKinematics
+from wpimath.kinematics import ChassisSpeeds, DifferentialDriveKinematics, DifferentialDriveWheelSpeeds
 from rev import CANSparkBase, CANSparkMax, CANSparkLowLevel
 from lib import utils, logger
 from lib.classes import SwerveModuleLocation, DriveSpeedMode, DriveOrientation, DriveDriftCorrection, DriveLockState
@@ -41,13 +41,14 @@ class DriveSubsystem(Subsystem):
 
     self._drivetrain = DifferentialDrive(self._leftFront, self._rightFront)
     self._leftEncoder = self._leftFront.getEncoder()
-    self._leftEncoder.setPositionConversionFactor(self._constants.kDistanceFactor)
-    self._leftEncoder.setVelocityConversionFactor(self._constants.kVelocityFactor)
+    self._leftEncoder.setPositionConversionFactor(self._constants.kDrivingEncoderPositionConversionFactor)
+    self._leftEncoder.setVelocityConversionFactor(self._constants.kDrivingEncoderVelocityConversionFactor)
     self._rightEncoder = self._rightFront.getEncoder()
-    self._rightEncoder.setPositionConversionFactor(self._constants.kDistanceFactor)
-    self._rightEncoder.setVelocityConversionFactor(self._constants.kVelocityFactor)
+    self._rightEncoder.setPositionConversionFactor(self._constants.kDrivingEncoderPositionConversionFactor)
+    self._rightEncoder.setVelocityConversionFactor(self._constants.kDrivingEncoderVelocityConversionFactor)
     self._kinematics = DifferentialDriveKinematics(self._constants.kDistanceBetweenWheels) 
-
+    # setIdleMode
+    # burnFlash
 
     self._isAlignedToTarget: bool = False
     self._targetAlignmentThetaController = PIDController(
@@ -71,6 +72,17 @@ class DriveSubsystem(Subsystem):
   def periodic(self) -> None:
     self._updateTelemetry()
 
+  def getSpeeds(self) -> ChassisSpeeds:
+    wheelSpeeds = DifferentialDriveWheelSpeeds(
+      self._leftEncoder.getVelocity(),
+      self._rightEncoder.getVelocity()
+    )
+    return self._constants.kDifferentialDriveKinematics.toChassisSpeeds(wheelSpeeds)
+  
+  def driveWithSpeeds(self, speeds: ChassisSpeeds) -> None:
+    wheelSpeeds = self._constants.kDifferentialDriveKinematics.toWheelSpeeds(speeds)
+    self._drivetrain.tankDrive(wheelSpeeds.left, wheelSpeeds.right)
+
   def driveWithControllerCommand(
       self, 
       getLeftY: Callable[[], float], 
@@ -79,6 +91,12 @@ class DriveSubsystem(Subsystem):
     return self.run(
       lambda: self._arcadeDrive(getLeftY(), getRightX())
     ).withName("DriveWithController")
+  
+  def getLeftEncoderPosition(self) -> float:
+    return self._leftEncoder.getPosition()
+  
+  def getRightEncoderPosition(self) -> float:
+    return self._rightEncoder.getPosition()
   
   def _arcadeDrive(self, speed: float, rotation: float) -> None:
     self._drivetrain.arcadeDrive(speed, rotation, True)

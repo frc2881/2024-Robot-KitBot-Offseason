@@ -1,7 +1,7 @@
 import math
 from wpilib import ADIS16470_IMU, SPI
 from wpimath.geometry import Transform3d, Translation3d, Rotation3d, Pose3d, Translation2d
-from wpimath.kinematics import SwerveDrive4Kinematics
+from wpimath.kinematics import DifferentialDriveKinematics
 from wpimath import units
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 from rev import CANSparkBase
@@ -75,12 +75,14 @@ class Subsystems:
     kSwerveModuleRearLeftTranslation = Translation2d(-kWheelBase / 2, kTrackWidth / 2)
     kSwerveModuleRearRightTranslation = Translation2d(-kWheelBase / 2, -kTrackWidth / 2)
 
-    kSwerveDriveKinematics = SwerveDrive4Kinematics(
-      kSwerveModuleFrontLeftTranslation, 
-      kSwerveModuleFrontRightTranslation, 
-      kSwerveModuleRearLeftTranslation, 
-      kSwerveModuleRearRightTranslation
+    kDifferentialDriveKinematics = DifferentialDriveKinematics(
+      kTrackWidth
     )
+
+    kWheelDiameterMeters: float = units.inchesToMeters(3.0)
+    kDrivingMotorReduction: float = 8.46
+    kDrivingEncoderPositionConversionFactor: float = (kWheelDiameterMeters * math.pi) / kDrivingMotorReduction
+    kDrivingEncoderVelocityConversionFactor: float = ((kWheelDiameterMeters * math.pi) / kDrivingMotorReduction) / 60.0
 
     class SwerveModule:
       kDrivingMotorPinionTeeth: int = 14
