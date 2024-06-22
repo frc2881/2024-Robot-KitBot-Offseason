@@ -58,8 +58,7 @@ class LocalizationSubsystem(Subsystem):
                 break
 
   def resetPose(self, pose: Pose2d) -> None:
-    # NO-OP as current pose is always maintained by pose sensors in the configuration for this robot
-    # self._poseEstimator.resetPosition(self._getGyroRotation(), self._getSwerveModulePositions(), pose)
+    self._poseEstimator.resetPosition(self._getGyroRotation(), self._getSwerveModulePositions(), pose)
     pass   
 
   def _isPoseOnField(self, pose: Pose2d) -> bool:

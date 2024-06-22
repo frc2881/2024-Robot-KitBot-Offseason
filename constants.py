@@ -139,10 +139,10 @@ class Sensors:
 
   class Pose:
     kPoseSensors: dict[str, Transform3d] = {
-      "Default": Transform3d(
-        Translation3d(units.inchesToMeters(0), units.inchesToMeters(0), units.inchesToMeters(0)),
-        Rotation3d(units.degreesToRadians(0), units.degreesToRadians(0), units.degreesToRadians(0))
-      )
+      # "Default": Transform3d(
+      #   Translation3d(units.inchesToMeters(0), units.inchesToMeters(0), units.inchesToMeters(0)),
+      #   Rotation3d(units.degreesToRadians(0), units.degreesToRadians(0), units.degreesToRadians(0))
+      # )
     }
     kPoseStrategy = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
     kFallbackPoseStrategy = PoseStrategy.LOWEST_AMBIGUITY
